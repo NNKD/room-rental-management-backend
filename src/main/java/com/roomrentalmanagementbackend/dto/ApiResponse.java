@@ -1,4 +1,4 @@
-package com.roomrentalmanagementbackend.dto.response;
+package com.roomrentalmanagementbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
