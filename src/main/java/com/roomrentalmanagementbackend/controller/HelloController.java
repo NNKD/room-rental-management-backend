@@ -1,6 +1,6 @@
 package com.roomrentalmanagementbackend.controller;
 
-import com.roomrentalmanagementbackend.dto.response.ApiResponse;
+import com.roomrentalmanagementbackend.dto.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
