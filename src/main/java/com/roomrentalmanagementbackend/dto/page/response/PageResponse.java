@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PageResponse<T> {
-    List<T> data;
+    List<T> list;
     int pageNumber;
     int pageSize;
     int totalElements;
