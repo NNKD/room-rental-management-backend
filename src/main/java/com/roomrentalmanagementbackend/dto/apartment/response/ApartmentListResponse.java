@@ -14,5 +14,6 @@ public class ApartmentListResponse {
     String name;
     String slug;
     String brief;
+    double price;
     List<ApartmentImageResponse> images;
 }

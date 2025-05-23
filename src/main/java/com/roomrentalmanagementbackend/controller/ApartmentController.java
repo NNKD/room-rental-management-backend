@@ -5,6 +5,7 @@ import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentListRespo
 import com.roomrentalmanagementbackend.dto.page.response.PageResponse;
 import com.roomrentalmanagementbackend.entity.Apartment;
 import com.roomrentalmanagementbackend.service.ApartmentService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,12 +26,13 @@ public class ApartmentController {
     ApartmentService apartmentService;
     ModelMapper modelMapper;
 
+    @Operation(description = "Get list apartments per page")
     @GetMapping
     public ApiResponse<PageResponse<ApartmentListResponse>> getAllApartments(@RequestParam int page) {
         Pageable pageable = PageRequest.of(page - 1, 6);
         Page<Apartment> apartments = apartmentService.getAllApartments(pageable);
         PageResponse<ApartmentListResponse> pageResponse = PageResponse.<ApartmentListResponse>builder()
-                .data(apartments.map(apartment ->
+                .list(apartments.map(apartment ->
                         modelMapper.map(apartment, ApartmentListResponse.class)).getContent())
                 .pageNumber(apartments.getNumber()+1)
                 .pageSize(apartments.getSize())

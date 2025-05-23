@@ -21,6 +21,8 @@ public class Apartment {
     String slug;
     String brief;
     int hot;
+    double price;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     ApartmentType apartmentType;
@@ -28,6 +30,9 @@ public class Apartment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     ApartmentStatus apartmentStatus;
+
+    @OneToMany(mappedBy = "apartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<ApartmentRentalDiscount> discounts;
 
     @OneToMany(mappedBy = "apartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<ApartmentImage> images;
