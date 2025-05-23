@@ -36,4 +36,7 @@ public class Apartment {
 
     @OneToMany(mappedBy = "apartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<ApartmentImage> images;
+
+    @OneToOne(mappedBy = "apartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    ApartmentInformation apartmentInformation;
 }
