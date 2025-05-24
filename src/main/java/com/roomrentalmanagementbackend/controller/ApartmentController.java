@@ -52,9 +52,9 @@ public class ApartmentController {
         PageResponse<ApartmentListResponse> pageResponse = PageResponse.<ApartmentListResponse>builder()
                 .list(apartments.map(apartment ->
                         modelMapper.map(apartment, ApartmentListResponse.class)).getContent())
-                .pageNumber(apartments.getNumber()+1)
+                .pageNumber(apartments.getNumber() + 1)
                 .pageSize(apartments.getSize())
-                .totalElements(apartments.getNumberOfElements())
+                .totalElements((int) apartments.getTotalElements())
                 .totalPages(apartments.getTotalPages()).build();
         return ApiResponse.success(pageResponse);
     }
