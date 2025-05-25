@@ -20,6 +20,8 @@ public class ApartmentInformation {
     double area;
     int floor;
     double balcony;
+    double terrace;
+    String furniture;
     int bedrooms;
     int kitchens;
     int bathrooms;

@@ -1,14 +1,68 @@
 package com.roomrentalmanagementbackend.repository;
 
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDiscountResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentImageResponse;
 import com.roomrentalmanagementbackend.entity.Apartment;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 
 @Repository
 public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, JpaSpecificationExecutor<Apartment> {
+    @Query("""
+            SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+                ApartmentDetailResponse(
+                    a.name,
+                    a.slug,
+                    a.brief,
+                    a.description,
+                    a.price,
+                    ai.width,
+                    ai.height,
+                    ai.floor,
+                    ai.balcony,
+                    ai.terrace,
+                    ai.furniture,
+                    ai.bedrooms,
+                    ai.kitchens,
+                    ai.bathrooms,
+                    at.name,
+                    null ,
+                    null 
+                )
+            FROM Apartment a
+            JOIN a.apartmentInformation ai
+            JOIN a.apartmentType at
+            WHERE a.slug = :slug
+            """)
+    ApartmentDetailResponse findApartmentDetailBySlug(@Param("slug") String slug);
+
+
+    @Query("""
+            SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+                ApartmentImageResponse(
+                    ai.url
+                ) 
+            FROM ApartmentImage ai
+            WHERE ai.apartment.slug = :slug
+            """)
+    List<ApartmentImageResponse> findImagesByApartmentSlug(@Param("slug") String slug);
+
+    @Query("""
+            SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+                ApartmentDiscountResponse(
+                    ad.discount_percent,
+                    ad.duration_month
+                ) 
+            FROM ApartmentRentalDiscount ad
+            WHERE ad.apartment.slug = :slug
+            """)
+    List<ApartmentDiscountResponse> findDiscountsByApartmentSlug(@Param("slug") String slug);
 }
