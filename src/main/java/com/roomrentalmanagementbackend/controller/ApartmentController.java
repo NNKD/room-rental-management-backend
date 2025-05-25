@@ -2,11 +2,14 @@ package com.roomrentalmanagementbackend.controller;
 
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
+import com.roomrentalmanagementbackend.dto.apartment.request.ApartmentDetailFormRequest;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentListResponse;
 import com.roomrentalmanagementbackend.dto.page.response.PageResponse;
 import com.roomrentalmanagementbackend.entity.Apartment;
 import com.roomrentalmanagementbackend.service.ApartmentService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,10 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/apartments")
@@ -64,4 +64,17 @@ public class ApartmentController {
     public ApiResponse<FilterDataResponse> getFilterData() {
         return ApiResponse.success(apartmentService.getFilterData());
     }
+
+    @Operation(description = "Get apartment detail by slug name")
+    @GetMapping("/{slug}")
+    public ApiResponse<ApartmentDetailResponse> getApartmentDetail(@PathVariable String slug) {
+        return apartmentService.getApartmentDetail(slug);
+    }
+
+    @Operation(description = "Apartment Detail Form (get name, email, message and send mail to admin)")
+    @PostMapping("/{slug}/form")
+    public ApiResponse sendMailFromApartmentDetailForm(@Valid @RequestBody ApartmentDetailFormRequest request) {
+        return ApiResponse.success(request);
+    }
+
 }

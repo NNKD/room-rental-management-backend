@@ -20,6 +20,7 @@ public class Apartment {
     String name;
     String slug;
     String brief;
+    String description;
     int hot;
     double price;
 

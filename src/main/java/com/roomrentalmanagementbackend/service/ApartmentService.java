@@ -1,7 +1,11 @@
 package com.roomrentalmanagementbackend.service;
 
+import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.MinMaxDTO;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDiscountResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentImageResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentTypeResponse;
 import com.roomrentalmanagementbackend.entity.Apartment;
 import com.roomrentalmanagementbackend.entity.ApartmentInformation;
@@ -19,6 +23,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -84,6 +89,26 @@ public class ApartmentService {
                 .maxBedroom(maxBedroom)
                 .types(types).build();
 
+    }
+
+//    Get apartment detail by slug
+    public ApiResponse<ApartmentDetailResponse> getApartmentDetail(String slug) {
+        ApartmentDetailResponse apartmentDetail = apartmentRepository.findApartmentDetailBySlug(slug);
+
+        if (slug == null || slug.trim().isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Slug không được để trống");
+        }
+
+        if (apartmentDetail == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "Slug không phù hợp");
+        }
+
+        List<ApartmentImageResponse> apartmentImage = apartmentRepository.findImagesByApartmentSlug(slug);
+        List<ApartmentDiscountResponse> apartmentDiscount = apartmentRepository.findDiscountsByApartmentSlug(slug);
+
+        apartmentDetail.setImages(apartmentImage);
+        apartmentDetail.setDiscounts(apartmentDiscount);
+        return ApiResponse.success(apartmentDetail);
     }
 
 
