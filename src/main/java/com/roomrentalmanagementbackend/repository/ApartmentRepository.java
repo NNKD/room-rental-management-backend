@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -65,4 +66,7 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
             WHERE ad.apartment.slug = :slug
             """)
     List<ApartmentDiscountResponse> findDiscountsByApartmentSlug(@Param("slug") String slug);
+
+    @Query("SELECT a.name FROM Apartment a WHERE a.slug = :slug")
+    Optional<String> findNameBySlug(@Param("slug") String slug);
 }
