@@ -1,4 +1,4 @@
-package com.roomrentalmanagementbackend.dto.request;
+package com.roomrentalmanagementbackend.dto.auth.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

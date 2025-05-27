@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Repository
 public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, JpaSpecificationExecutor<Apartment> {
+    List<Apartment> findByHot(int hot);
     @Query("""
             SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
                 ApartmentDetailResponse(

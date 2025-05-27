@@ -40,6 +40,9 @@ public class ApartmentService {
     ApartmentInformationService apartmentInformationService;
     ModelMapper modelMapper;
 
+    public List<Apartment> getHotApartments() {
+        return apartmentRepository.findByHot(1);
+    }
 //    Use Specification to make filter
     public Page<Apartment> getAllApartmentsPerPageFilter(Pageable pageable, String name, String type,
                                                          Integer bedroom, Double priceMin, Double priceMax) {
