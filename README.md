@@ -17,8 +17,8 @@ This is the backend of an **Room Management System**, built using **Spring Boot*
 DATABASE_URL=    
 DATABASE_USERNAME=  
 DATABASE_PASSWORD=  
-CORS_URL=
-MAIL_USERNAME=
+CORS_URL=   
+MAIL_USERNAME=  
 MAIL_PASSWORD=
 
 > **Note:**
