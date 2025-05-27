@@ -5,20 +5,28 @@ import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataR
 import com.roomrentalmanagementbackend.dto.apartment.request.ApartmentDetailFormRequest;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentListResponse;
+import com.roomrentalmanagementbackend.dto.mail.request.MailSenderRequest;
 import com.roomrentalmanagementbackend.dto.page.response.PageResponse;
 import com.roomrentalmanagementbackend.entity.Apartment;
 import com.roomrentalmanagementbackend.service.ApartmentService;
+import com.roomrentalmanagementbackend.service.MailService;
+import com.roomrentalmanagementbackend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/apartments")
@@ -27,6 +35,8 @@ import org.springframework.web.bind.annotation.*;
 public class ApartmentController {
     ApartmentService apartmentService;
     ModelMapper modelMapper;
+    MailService mailService;
+    UserService userService;
 
     @Operation(description = "Get list apartments per page with filter (apartment name, apartment type, number of bedroom, min price, max price) and sort by price")
     @GetMapping
@@ -74,7 +84,20 @@ public class ApartmentController {
     @Operation(description = "Apartment Detail Form (get name, email, message and send mail to admin)")
     @PostMapping("/{slug}/form")
     public ApiResponse sendMailFromApartmentDetailForm(@Valid @RequestBody ApartmentDetailFormRequest request) {
-        return ApiResponse.success(request);
+
+        List<String> emailAdmin = userService.getEmailAdmin();
+
+        String apartmentName = apartmentService.getNameBySlug(request.getSlug()).orElse("không xác định");
+
+        for (String email : emailAdmin) {
+            MailSenderRequest mailSender = MailSenderRequest.builder()
+                    .to(email)
+                    .subject("Tin nhắn từ: "+request.getEmail()+" về căn hộ "+apartmentName)
+                    .body(request.getMessage()).build();
+
+            mailService.sendMail(mailSender);
+        }
+        return ApiResponse.success("Gửi thành công");
     }
 
 }

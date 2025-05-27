@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -111,5 +112,8 @@ public class ApartmentService {
         return ApiResponse.success(apartmentDetail);
     }
 
+    public Optional<String> getNameBySlug(String slug) {
+        return apartmentRepository.findNameBySlug(slug);
+    }
 
 }
