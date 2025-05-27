@@ -16,16 +16,13 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,7 +34,15 @@ public class ApartmentController {
     ModelMapper modelMapper;
     MailService mailService;
     UserService userService;
-
+    @Operation(description = "Get list of hot apartments (hot = 1)")
+    @GetMapping("/hot")
+    public ApiResponse<List<ApartmentListResponse>> getHotApartments() {
+        List<Apartment> hotApartments = apartmentService.getHotApartments();
+        List<ApartmentListResponse> response = hotApartments.stream()
+                .map(apartment -> modelMapper.map(apartment, ApartmentListResponse.class))
+                .toList();
+        return ApiResponse.success(response);
+    }
     @Operation(description = "Get list apartments per page with filter (apartment name, apartment type, number of bedroom, min price, max price) and sort by price")
     @GetMapping
     public ApiResponse<PageResponse<ApartmentListResponse>> getAllApartments(@RequestParam int page,

@@ -1,14 +1,11 @@
 package com.roomrentalmanagementbackend.service;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.roomrentalmanagementbackend.dto.request.AuthenticationRequest;
-import com.roomrentalmanagementbackend.dto.response.AuthenticationResponse;
+import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
+import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
+import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
 import com.roomrentalmanagementbackend.entity.User;
 import com.roomrentalmanagementbackend.repository.UserRepository;
 import lombok.AccessLevel;
@@ -21,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -31,6 +29,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
     UserRepository userRepository;
+    MailService mailService;
     @NonFinal
     protected static final String SIGNER_KEY = "61vYixZpRImO5DL5Nugi7jHOuCaJ2W2P0mHlPjfhfNAnUOBm+jOOJsPfjhgcbkWd";
 
@@ -114,7 +113,28 @@ public class UserService {
                 .authenticated(true)
                 .build();
     }
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Email không tồn tại"));
+        String newPassword = generateRandomPassword();
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
 
+        mailService.sendPasswordResetMail(user.getEmail(), newPassword);
+    }
+
+    private String generateRandomPassword() {
+        // Tạo mật khẩu ngẫu nhiên, ví dụ 8 ký tự
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return password.toString();
+    }
     private String generateToken(String username) throws JOSEException {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
