@@ -3,6 +3,7 @@ package com.roomrentalmanagementbackend.repository;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDiscountResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentImageResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentManagementResponse;
 import com.roomrentalmanagementbackend.entity.Apartment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -69,4 +70,25 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
 
     @Query("SELECT a.name FROM Apartment a WHERE a.slug = :slug")
     Optional<String> findNameBySlug(@Param("slug") String slug);
+
+    @Query("""
+        SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+            ApartmentManagementResponse(
+                a.name,
+                a.slug,
+                a.price,
+                at.name,
+                aStatus.name,
+                u.fullname,
+                u.email
+            )
+        FROM Apartment a
+        JOIN a.apartmentType at
+        JOIN a.apartmentStatus aStatus
+        LEFT JOIN a.rentalContracts rc
+        LEFT JOIN rc.user u
+        ORDER BY a.id ASC
+    """)
+    List<ApartmentManagementResponse> findAllWithUserAndRentalContractStatus();
+
 }

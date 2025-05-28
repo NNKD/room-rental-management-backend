@@ -3,13 +3,11 @@ package com.roomrentalmanagementbackend.service;
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.MinMaxDTO;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDiscountResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentImageResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentTypeResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.*;
 import com.roomrentalmanagementbackend.entity.Apartment;
 import com.roomrentalmanagementbackend.entity.ApartmentInformation;
 import com.roomrentalmanagementbackend.entity.ApartmentType;
+import com.roomrentalmanagementbackend.enums.RentalStatus;
 import com.roomrentalmanagementbackend.repository.ApartmentRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -116,4 +114,7 @@ public class ApartmentService {
         return apartmentRepository.findNameBySlug(slug);
     }
 
+    public List<ApartmentManagementResponse> getApartmentManagement() {
+        return apartmentRepository.findAllWithUserAndRentalContractStatus();
+    }
 }

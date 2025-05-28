@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Table(name = "user")
 @Data
@@ -21,4 +23,7 @@ public class User {
     String fullname;
     String phone;
     int role;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<RentalContract> rentalContracts;
 }
