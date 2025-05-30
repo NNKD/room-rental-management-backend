@@ -4,10 +4,12 @@ import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentDTO;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentStatusDTO;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentTypeDTO;
+import com.roomrentalmanagementbackend.dto.apartment.UtilityServiceDTO;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentManagementResponse;
 import com.roomrentalmanagementbackend.service.ApartmentService;
 import com.roomrentalmanagementbackend.service.ApartmentStatusService;
 import com.roomrentalmanagementbackend.service.ApartmentTypeService;
+import com.roomrentalmanagementbackend.service.UtilityServiceService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +28,7 @@ public class DashBoardController {
     ApartmentService apartmentService;
     ApartmentStatusService apartmentStatusService;
     ApartmentTypeService apartmentTypeService;
+    UtilityServiceService utilityServiceService;
 
     @GetMapping("/apartments")
     public ApiResponse<List<ApartmentManagementResponse>> getApartmentManagement() {
@@ -45,5 +48,10 @@ public class DashBoardController {
     @GetMapping("/types")
     public ApiResponse<List<ApartmentTypeDTO>> getAllType() {
         return ApiResponse.success(apartmentTypeService.getAllType());
+    }
+
+    @GetMapping("/services")
+    public ApiResponse<List<UtilityServiceDTO>> getAllServices() {
+        return ApiResponse.success(utilityServiceService.getAllServicesDTO());
     }
 }

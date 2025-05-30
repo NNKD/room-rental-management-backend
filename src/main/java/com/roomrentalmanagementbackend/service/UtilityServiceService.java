@@ -1,5 +1,6 @@
 package com.roomrentalmanagementbackend.service;
 
+import com.roomrentalmanagementbackend.dto.apartment.UtilityServiceDTO;
 import com.roomrentalmanagementbackend.entity.UtilityService;
 import com.roomrentalmanagementbackend.repository.UtilityServiceRepository;
 import lombok.AccessLevel;
@@ -17,5 +18,9 @@ public class UtilityServiceService {
 
     public List<UtilityService> getAllServices() {
         return utilityServiceRepository.findAll();
+    }
+
+    public List<UtilityServiceDTO> getAllServicesDTO() {
+        return utilityServiceRepository.findAllService();
     }
 }

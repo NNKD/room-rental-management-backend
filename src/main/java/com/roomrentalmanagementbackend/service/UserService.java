@@ -140,7 +140,6 @@ public class UserService {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                     .subject(username)
-                    .issuer("devteria.com")
                     .issueTime(new Date())
                     .expirationTime(new Date(Instant.now().plus(15, ChronoUnit.MINUTES).toEpochMilli()))
                     .claim("customClaim", "Custom")
