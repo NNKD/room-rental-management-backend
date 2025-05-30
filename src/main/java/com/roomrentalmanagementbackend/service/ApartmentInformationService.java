@@ -1,6 +1,8 @@
 package com.roomrentalmanagementbackend.service;
 
 import com.roomrentalmanagementbackend.dto.MinMaxDTO;
+import com.roomrentalmanagementbackend.dto.apartment.ApartmentInformationDTO;
+import com.roomrentalmanagementbackend.entity.ApartmentInformation;
 import com.roomrentalmanagementbackend.repository.ApartmentInformationRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,5 +19,9 @@ public class ApartmentInformationService {
 
     public MinMaxDTO getMinMaxBedrooms() {
         return apartmentInformationRepository.findMinMaxBedroom();
+    }
+
+    public ApartmentInformationDTO getApartmentInformationByApartmentSlug(String slug) {
+        return apartmentInformationRepository.findApartmentInformationByApartmentSlug(slug).orElse(null);
     }
 }

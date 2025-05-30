@@ -40,4 +40,7 @@ public class Apartment {
 
     @OneToOne(mappedBy = "apartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     ApartmentInformation apartmentInformation;
+
+    @OneToMany(mappedBy = "apartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<RentalContract> rentalContracts;
 }

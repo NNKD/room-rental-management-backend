@@ -2,14 +2,13 @@ package com.roomrentalmanagementbackend.service;
 
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.MinMaxDTO;
+import com.roomrentalmanagementbackend.dto.apartment.*;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDiscountResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentImageResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentTypeResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.*;
 import com.roomrentalmanagementbackend.entity.Apartment;
 import com.roomrentalmanagementbackend.entity.ApartmentInformation;
 import com.roomrentalmanagementbackend.entity.ApartmentType;
+import com.roomrentalmanagementbackend.enums.RentalStatus;
 import com.roomrentalmanagementbackend.repository.ApartmentRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -37,6 +36,7 @@ import java.util.Optional;
 public class ApartmentService {
     ApartmentRepository apartmentRepository;
     ApartmentTypeService apartmentTypeService;
+    ApartmentStatusService apartmentStatusService;
     ApartmentInformationService apartmentInformationService;
     ModelMapper modelMapper;
 
@@ -119,4 +119,34 @@ public class ApartmentService {
         return apartmentRepository.findNameBySlug(slug);
     }
 
+    public List<ApartmentManagementResponse> getApartmentManagement() {
+        return apartmentRepository.findAllWithUserAndRentalContractStatus();
+    }
+
+    public ApiResponse<ApartmentDTO> getApartmentDTOBySlug(String slug) {
+        ApartmentDTO apartment = apartmentRepository.findApartmentDTOBySlug(slug).orElse(null);
+
+        if (slug == null || slug.trim().isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Slug không được để trống");
+        }
+
+        if (apartment == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "Slug không phù hợp");
+        }
+
+        ApartmentTypeDTO apartmentType = apartmentTypeService.getTypeByApartmentSlug(slug);
+        ApartmentStatusDTO apartmentStatus = apartmentStatusService.getStatusByApartmentSlug(slug);
+        List<ApartmentImageDTO> apartmentImage = apartmentRepository.findImagesDTOByApartmentSlug(slug);
+        List<ApartmentDiscountDTO> apartmentDiscount = apartmentRepository.findDiscountsDTOByApartmentSlug(slug);
+        ApartmentInformationDTO apartmentInformation = apartmentInformationService.getApartmentInformationByApartmentSlug(slug);
+
+        apartment.setType(apartmentType);
+        apartment.setStatus(apartmentStatus);
+        apartment.setDiscounts(apartmentDiscount);
+        apartment.setImages(apartmentImage);
+        apartment.setInformation(apartmentInformation);
+
+        return ApiResponse.success(apartment);
+
+    }
 }

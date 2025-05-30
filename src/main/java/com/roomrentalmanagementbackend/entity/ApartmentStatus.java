@@ -16,5 +16,4 @@ public class ApartmentStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
     String name;
-    String description;
 }
