@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/apartments")
@@ -103,6 +104,11 @@ public class ApartmentController {
             mailService.sendMail(mailSender);
         }
         return ApiResponse.success("Gửi thành công");
+    }
+
+    @GetMapping("/check-slug")
+    public ApiResponse<Boolean> validSlugName(@RequestParam String slug) {
+        return ApiResponse.success(apartmentService.checkValidSlug(slug));
     }
 
 }

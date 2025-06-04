@@ -5,11 +5,10 @@ import com.roomrentalmanagementbackend.dto.MinMaxDTO;
 import com.roomrentalmanagementbackend.dto.apartment.*;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.*;
-import com.roomrentalmanagementbackend.entity.Apartment;
-import com.roomrentalmanagementbackend.entity.ApartmentInformation;
-import com.roomrentalmanagementbackend.entity.ApartmentType;
+import com.roomrentalmanagementbackend.entity.*;
 import com.roomrentalmanagementbackend.enums.RentalStatus;
 import com.roomrentalmanagementbackend.repository.ApartmentRepository;
+import com.roomrentalmanagementbackend.utils.CloudinaryUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -25,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +38,7 @@ public class ApartmentService {
     ApartmentTypeService apartmentTypeService;
     ApartmentStatusService apartmentStatusService;
     ApartmentInformationService apartmentInformationService;
+    CloudinaryUtils cloudinaryUtils;
     ModelMapper modelMapper;
 
     public List<Apartment> getHotApartments() {
@@ -148,5 +149,51 @@ public class ApartmentService {
 
         return ApiResponse.success(apartment);
 
+    }
+
+    public ApiResponse<String> addOrUpdateApartment(ApartmentDTO apartmentDTO) {
+        Apartment apartment = Apartment.builder()
+                .id(apartmentDTO.getId())
+                .name(apartmentDTO.getName())
+                .slug(apartmentDTO.getSlug())
+                .brief(apartmentDTO.getBrief())
+                .description(apartmentDTO.getDescription())
+                .hot(apartmentDTO.getHot())
+                .price(apartmentDTO.getPrice())
+                .apartmentType(ApartmentType.builder().id(apartmentDTO.getType().getId()).build())
+                .apartmentStatus(ApartmentStatus.builder().id(apartmentDTO.getStatus().getId()).build())
+                .images(apartmentDTO.getImages().stream().map(i -> modelMapper.map(i, ApartmentImage.class)).toList())
+                .discounts(apartmentDTO.getDiscounts().stream().map(d -> modelMapper.map(d, ApartmentRentalDiscount.class)).toList())
+                .apartmentInformation(modelMapper.map(apartmentDTO.getInformation(), ApartmentInformation.class))
+                .build();
+
+        apartment.getApartmentInformation().setApartment(apartment);
+        apartment.getImages().forEach(i -> i.setApartment(apartment));
+        apartment.getDiscounts().forEach(d -> d.setApartment(apartment));
+
+        apartmentRepository.save(apartment);
+        return ApiResponse.success("Thành công");
+    }
+
+    public ApiResponse<String> deleteApartment(String id) {
+        try {
+            int idA = Integer.parseInt(id);
+            Apartment apartment = apartmentRepository.findById(idA).orElse(null);
+            if (apartment == null) {
+                return ApiResponse.error(HttpStatus.BAD_REQUEST,"Căn hộ không tồn tại");
+            }
+            List<ApartmentImageDTO> imageDTOS = apartment.getImages().stream().map(i -> modelMapper.map(i, ApartmentImageDTO.class)).toList();
+            cloudinaryUtils.deleteListImg(imageDTOS);
+            apartmentRepository.delete(apartment);
+            return ApiResponse.success("Xoá thành công");
+        }catch (NumberFormatException e) {
+            throw new NumberFormatException("Id phải là số");
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi xoá ảnh khi xoá căn hộ", e);
+        }
+    }
+
+    public boolean checkValidSlug(String slug) {
+        return (getNameBySlug(slug).orElse("")).isEmpty();
     }
 }

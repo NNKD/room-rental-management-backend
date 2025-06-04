@@ -1,5 +1,6 @@
 package com.roomrentalmanagementbackend.dto.apartment;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

@@ -1,4 +1,4 @@
-package com.roomrentalmanagementbackend.config;
+package com.roomrentalmanagementbackend.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
