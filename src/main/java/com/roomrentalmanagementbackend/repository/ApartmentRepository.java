@@ -101,6 +101,7 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
     @Query("""
         SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
             ApartmentManagementResponse(
+                a.id,
                 a.name,
                 a.slug,
                 a.price,

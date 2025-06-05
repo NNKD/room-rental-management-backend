@@ -36,4 +36,6 @@ public interface ApartmentTypeRepository extends JpaRepository<ApartmentType, In
             FROM ApartmentType at
             """)
     List<ApartmentTypeDTO> findAllApartmentType();
+
+    Optional<ApartmentType> findApartmentTypeByName(String name);
 }

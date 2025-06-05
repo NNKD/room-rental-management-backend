@@ -53,4 +53,10 @@ public class GlobalExceptionHandling {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
     }
+
+    @ExceptionHandler(value = NumberFormatException.class)
+    ResponseEntity<ApiResponse> handleNumberFormatException(NumberFormatException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
 }
