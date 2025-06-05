@@ -62,9 +62,25 @@ public class DashBoardController {
     }
 
     @DeleteMapping("/apartments/{id}")
-    public ApiResponse<String> addOrUpdateApartment(@PathVariable String id) {
+    public ApiResponse<String> deleteApartment(@PathVariable String id) {
         log.info(id);
         return apartmentService.deleteApartment(id);
+    }
+
+    @PostMapping("/types")
+    public ApiResponse<String> addOrUpdateType(@RequestBody @Valid ApartmentTypeDTO apartmentTypeDTO) {
+        log.info(apartmentTypeDTO.toString());
+        return apartmentTypeService.addOrUpdateType(apartmentTypeDTO);
+    }
+
+    @DeleteMapping("/types/{id}")
+    public ApiResponse<String> deleteType(@PathVariable String id) {
+        return apartmentTypeService.deleteType(id);
+    }
+
+    @GetMapping("/types/check-name")
+    public ApiResponse<Boolean> checkType(@RequestParam String name) {
+        return apartmentTypeService.validType(name);
     }
 
 }
