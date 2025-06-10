@@ -4,9 +4,9 @@ import com.nimbusds.jose.JOSEException;
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
 import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
+import com.roomrentalmanagementbackend.dto.auth.request.UserRequestDTO;
 import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
 import com.roomrentalmanagementbackend.dto.auth.response.UserResponse;
-import com.roomrentalmanagementbackend.entity.User;
 import com.roomrentalmanagementbackend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -25,11 +25,11 @@ import java.util.List;
 public class AuthController {
     UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthenticationResponse>> register(@RequestBody User user) throws JOSEException {
-        AuthenticationResponse response = userService.register(user);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
+//    @PostMapping("/register")
+//    public ResponseEntity<ApiResponse<AuthenticationResponse>> register(@RequestBody User user) throws JOSEException {
+//        AuthenticationResponse response = userService.register(user);
+//        return ResponseEntity.ok(ApiResponse.success(response));
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> login(@Valid @RequestBody AuthenticationRequest request) throws JOSEException {
@@ -52,5 +52,22 @@ public class AuthController {
     public ApiResponse<List<UserResponse>> getAllAdmins() {
         List<UserResponse> admins = userService.getAllAdmins();
         return ApiResponse.success(admins);
+    }
+    @PostMapping
+    public ApiResponse<UserResponse> createUser(@RequestBody UserRequestDTO request) {
+        UserResponse user = userService.createUser(request);
+        return ApiResponse.success(user);
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<UserResponse> updateUser(@PathVariable int id, @RequestBody UserRequestDTO request) {
+        UserResponse user = userService.updateUser(id, request);
+        return ApiResponse.success(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteUser(@PathVariable int id) {
+        userService.deleteUser(id);
+        return ApiResponse.success("User deleted successfully");
     }
 }
