@@ -5,7 +5,9 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
 import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
+import com.roomrentalmanagementbackend.dto.auth.request.UserRequestDTO;
 import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
+import com.roomrentalmanagementbackend.dto.auth.response.UserResponse;
 import com.roomrentalmanagementbackend.entity.User;
 import com.roomrentalmanagementbackend.repository.UserRepository;
 import lombok.AccessLevel;
@@ -23,6 +25,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,54 +40,54 @@ public class UserService {
         return userRepository.findEmailByRole(1);
     }
 
-    @Transactional
-    public AuthenticationResponse register(User user) throws JOSEException {
-        // Validate input
-        if (user.getUsername() == null || user.getUsername().isBlank()) {
-            throw new IllegalArgumentException("Username is required");
-        }
-        if (user.getPassword() == null || user.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password is required");
-        }
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Email is required");
-        }
-
-        // Check if username or email exists
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        // Set default values if not provided
-        if (user.getFullname() == null || user.getFullname().isBlank()) {
-            user.setFullname(user.getUsername()); // Default to username if fullname is empty
-        }
-        if (user.getPhone() == null || user.getPhone().isBlank()) {
-            user.setPhone(""); // Set empty phone if not provided
-        }
-        if (user.getRole() == 0) {
-            user.setRole(0); // Default role to 0 (e.g., regular user)
-        }
-
-        // Encode password and save user
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User savedUser = userRepository.save(user);
-        if (savedUser == null) {
-            throw new RuntimeException("Failed to register user");
-        }
-
-        // Generate token
-        String token = generateToken(savedUser.getUsername());
-
-        return AuthenticationResponse.builder()
-                .token(token)
-                .authenticated(true)
-                .build();
-    }
+//    @Transactional
+//    public AuthenticationResponse register(User user) throws JOSEException {
+//        // Validate input
+//        if (user.getUsername() == null || user.getUsername().isBlank()) {
+//            throw new IllegalArgumentException("Username is required");
+//        }
+//        if (user.getPassword() == null || user.getPassword().isBlank()) {
+//            throw new IllegalArgumentException("Password is required");
+//        }
+//        if (user.getEmail() == null || user.getEmail().isBlank()) {
+//            throw new IllegalArgumentException("Email is required");
+//        }
+//
+//        // Check if username or email exists
+//        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+//            throw new IllegalArgumentException("Username already exists");
+//        }
+//        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+//            throw new IllegalArgumentException("Email already exists");
+//        }
+//
+//        // Set default values if not provided
+//        if (user.getFullname() == null || user.getFullname().isBlank()) {
+//            user.setFullname(user.getUsername()); // Default to username if fullname is empty
+//        }
+//        if (user.getPhone() == null || user.getPhone().isBlank()) {
+//            user.setPhone(""); // Set empty phone if not provided
+//        }
+//        if (user.getRole() == 0) {
+//            user.setRole(0); // Default role to 0 (e.g., regular user)
+//        }
+//
+//        // Encode password and save user
+//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+//        User savedUser = userRepository.save(user);
+//        if (savedUser == null) {
+//            throw new RuntimeException("Failed to register user");
+//        }
+//
+//        // Generate token
+//        String token = generateToken(savedUser.getUsername());
+//
+//        return AuthenticationResponse.builder()
+//                .token(token)
+//                .authenticated(true)
+//                .build();
+//    }
 
     @Transactional
     public AuthenticationResponse login(AuthenticationRequest request) throws JOSEException {
@@ -124,6 +127,124 @@ public class UserService {
 
         mailService.sendPasswordResetMail(user.getEmail(), newPassword);
     }
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullname(user.getFullname())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .totalRentalContracts(user.getRentalContracts() != null ? user.getRentalContracts().size() : 0)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllAdmins() {
+        return userRepository.findByRole(1).stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullname(user.getFullname())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .totalRentalContracts(user.getRentalContracts() != null ? user.getRentalContracts().size() : 0)
+                        .build())
+                .collect(Collectors.toList());
+    }
+    @Transactional
+    public UserResponse createUser(UserRequestDTO request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("userNameExists");
+        }
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("emailExists");
+        }
+
+        String randomPassword = generateRandomPassword();
+        User user = User.builder()
+                .email(request.getEmail())
+                .username(request.getUsername())
+                .fullname(request.getFullname())
+                .phone(request.getPhone() != null ? request.getPhone() : "")
+                .password(new BCryptPasswordEncoder().encode(randomPassword))
+                .role(request.getRole())
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        mailService.sendAccountCreationMail(
+                savedUser.getEmail(),
+                savedUser.getUsername(),
+                savedUser.getFullname(),
+                savedUser.getPhone(),
+                savedUser.getRole(),
+                randomPassword
+        );
+
+        return UserResponse.builder()
+                .id(savedUser.getId())
+                .email(savedUser.getEmail())
+                .username(savedUser.getUsername())
+                .fullname(savedUser.getFullname())
+                .phone(savedUser.getPhone())
+                .role(savedUser.getRole())
+                .totalRentalContracts(0)
+                .build();
+    }
+
+    @Transactional
+    public UserResponse updateUser(int id, UserRequestDTO request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
+
+        if (!request.getEmail().equals(user.getEmail()) && userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        if (!request.getUsername().equals(user.getUsername()) && userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        user.setEmail(request.getEmail());
+        user.setUsername(request.getUsername());
+        user.setFullname(request.getFullname());
+        user.setPhone(request.getPhone() != null ? request.getPhone() : "");
+        user.setRole(request.getRole());
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+        }
+
+        User updatedUser = userRepository.save(user);
+
+        return UserResponse.builder()
+                .id(updatedUser.getId())
+                .email(updatedUser.getEmail())
+                .username(updatedUser.getUsername())
+                .fullname(updatedUser.getFullname())
+                .phone(updatedUser.getPhone())
+                .role(updatedUser.getRole())
+                .totalRentalContracts(updatedUser.getRentalContracts() != null ? updatedUser.getRentalContracts().size() : 0)
+                .build();
+    }
+
+    @Transactional
+    public void deleteUser(int id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
+
+        int contractCount = user.getRentalContracts() != null ? user.getRentalContracts().size() : 0;
+        if (contractCount > 0) {
+            throw new IllegalStateException("Cannot delete user with active rental contracts");
+        }
+
+        userRepository.deleteById(id);
+    }
+
 
     private String generateRandomPassword() {
         // Tạo mật khẩu ngẫu nhiên, ví dụ 8 ký tự
