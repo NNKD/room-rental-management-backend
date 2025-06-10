@@ -165,16 +165,26 @@ public class UserService {
             throw new IllegalArgumentException("emailExists");
         }
 
+        String randomPassword = generateRandomPassword();
         User user = User.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .fullname(request.getFullname())
                 .phone(request.getPhone() != null ? request.getPhone() : "")
-                .password(generateRandomPassword())
+                .password(new BCryptPasswordEncoder().encode(randomPassword))
                 .role(request.getRole())
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        mailService.sendAccountCreationMail(
+                savedUser.getEmail(),
+                savedUser.getUsername(),
+                savedUser.getFullname(),
+                savedUser.getPhone(),
+                savedUser.getRole(),
+                randomPassword
+        );
 
         return UserResponse.builder()
                 .id(savedUser.getId())
