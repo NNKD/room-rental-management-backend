@@ -23,4 +23,28 @@ public class UtilityServiceService {
     public List<UtilityServiceDTO> getAllServicesDTO() {
         return utilityServiceRepository.findAllService();
     }
+
+
+    public UtilityService getServiceById(int id) {
+        return utilityServiceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("serviceNotFound"));
+    }
+
+    public UtilityService createService(UtilityService service) {
+        return utilityServiceRepository.save(service);
+    }
+
+    public UtilityService updateService(int id, UtilityService serviceDetails) {
+        UtilityService service = getServiceById(id);
+        service.setName(serviceDetails.getName());
+        service.setDescription(serviceDetails.getDescription());
+        service.setPrice(serviceDetails.getPrice());
+        service.setUnit(serviceDetails.getUnit());
+        return utilityServiceRepository.save(service);
+    }
+
+    public void deleteService(int id) {
+        UtilityService service = getServiceById(id);
+        utilityServiceRepository.delete(service);
+    }
 }

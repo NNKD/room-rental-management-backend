@@ -7,9 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,4 +25,32 @@ public class UtilityServiceController {
         return ApiResponse.success(utilityServiceService.getAllServices());
     }
 
+    @PostMapping
+    public ApiResponse<UtilityService> createService(@RequestBody UtilityService service) {
+        UtilityService createdService = utilityServiceService.createService(service);
+        return ApiResponse.success(createdService);
+    }
+    @PutMapping("/{id}")
+    public ApiResponse<UtilityService> updateService(@PathVariable int id, @RequestBody UtilityService service) {
+        try {
+            return ApiResponse.success(utilityServiceService.updateService(id, service));
+        } catch (RuntimeException e) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "serviceNotFound");
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "error");
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse deleteService(@PathVariable int id) {
+        try {
+            utilityServiceService.deleteService(id);
+            return ApiResponse.success(null);
+        } catch (RuntimeException e) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "serviceNotFound");
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "error");
+
+        }
+    }
 }
