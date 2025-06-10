@@ -6,6 +6,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
 import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
 import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
+import com.roomrentalmanagementbackend.dto.auth.response.UserResponse;
 import com.roomrentalmanagementbackend.entity.User;
 import com.roomrentalmanagementbackend.repository.UserRepository;
 import lombok.AccessLevel;
@@ -23,6 +24,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -123,6 +125,35 @@ public class UserService {
         userRepository.save(user);
 
         mailService.sendPasswordResetMail(user.getEmail(), newPassword);
+    }
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullname(user.getFullname())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .totalRentalContracts(user.getRentalContracts() != null ? user.getRentalContracts().size() : 0)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllAdmins() {
+        return userRepository.findByRole(1).stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullname(user.getFullname())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .totalRentalContracts(user.getRentalContracts() != null ? user.getRentalContracts().size() : 0)
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private String generateRandomPassword() {

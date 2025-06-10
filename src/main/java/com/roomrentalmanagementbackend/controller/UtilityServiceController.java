@@ -42,7 +42,7 @@ public class UtilityServiceController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse deleteService(@PathVariable int id) {
+    public ApiResponse<Object> deleteService(@PathVariable int id) {
         try {
             utilityServiceService.deleteService(id);
             return ApiResponse.success(null);
