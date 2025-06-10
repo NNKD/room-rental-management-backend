@@ -11,7 +11,6 @@ import java.util.List;
 @Repository
 public interface UtilityServiceRepository extends JpaRepository<UtilityService, Integer> {
     List<UtilityService> findAll();
-
     @Query("""
             SELECT new com.roomrentalmanagementbackend.dto.apartment.
                 UtilityServiceDTO(
