@@ -1,4 +1,4 @@
-package com.roomrentalmanagementbackend.dto.auth.response;
+package com.roomrentalmanagementbackend.dto.user.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,13 +8,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    int id;
-    String email;
+public class UserInfoDTO {
     String username;
-    String fullname;
-    String phone;
+    String email;
     int role;
-    int totalRentalContracts;
-
 }

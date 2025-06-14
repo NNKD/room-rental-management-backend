@@ -1,4 +1,4 @@
-package com.roomrentalmanagementbackend.dto.auth.request;
+package com.roomrentalmanagementbackend.dto.user.request;
 
 import lombok.Data;
 
