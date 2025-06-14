@@ -21,10 +21,15 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     List<User> findByRole(int role);
+
+    @Query("SELECT DISTINCT u FROM User u JOIN u.rentalContracts rc")
+    List<User> findUsersWithRentalContracts();
+
     @Query("""
             SELECT new com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO(u.username, u.email, u.role)
             FROM User u
             WHERE u.username = :username
             """)
     Optional<UserInfoDTO> findUserInfo(@Param("username") String username);
+
 }

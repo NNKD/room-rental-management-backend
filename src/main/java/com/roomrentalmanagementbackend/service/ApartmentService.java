@@ -6,7 +6,6 @@ import com.roomrentalmanagementbackend.dto.apartment.*;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.*;
 import com.roomrentalmanagementbackend.entity.*;
-import com.roomrentalmanagementbackend.enums.RentalStatus;
 import com.roomrentalmanagementbackend.repository.ApartmentRepository;
 import com.roomrentalmanagementbackend.utils.CloudinaryUtils;
 import jakarta.persistence.criteria.Join;
@@ -15,8 +14,6 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +23,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -44,7 +43,24 @@ public class ApartmentService {
     public List<Apartment> getHotApartments() {
         return apartmentRepository.findByHot(1);
     }
-//    Use Specification to make filter
+    public List<ApartmentStatusDTO> getAvailableApartments(Integer status) {
+        try {
+            if (status == null || status < 1) {
+                return Collections.emptyList();
+            }
+            List<Apartment> apartments = apartmentRepository.findByApartmentStatusId(status);
+            return apartments.stream()
+                    .map(apartment -> ApartmentStatusDTO.builder()
+                            .id(apartment.getId())
+                            .name(apartment.getName())
+                            .build())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error in getAvailableApartments: " + e.getMessage());
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
     public Page<Apartment> getAllApartmentsPerPageFilter(Pageable pageable, String name, String type,
                                                          Integer bedroom, Double priceMin, Double priceMax) {
         Specification<Apartment> spec = ((root, query, cb) -> {
