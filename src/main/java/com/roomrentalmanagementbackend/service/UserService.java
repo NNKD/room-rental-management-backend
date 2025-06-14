@@ -5,15 +5,19 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
 import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
-import com.roomrentalmanagementbackend.dto.auth.request.UserRequestDTO;
+import com.roomrentalmanagementbackend.dto.user.request.UserRequestDTO;
 import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
-import com.roomrentalmanagementbackend.dto.auth.response.UserResponse;
+import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
+import com.roomrentalmanagementbackend.dto.user.response.UserResponse;
 import com.roomrentalmanagementbackend.entity.User;
 import com.roomrentalmanagementbackend.repository.UserRepository;
+import com.roomrentalmanagementbackend.utils.MessageUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,8 +37,10 @@ import java.util.stream.Collectors;
 public class UserService {
     UserRepository userRepository;
     MailService mailService;
+    MessageUtils messageUtils;
     @NonFinal
-    protected static final String SIGNER_KEY = "61vYixZpRImO5DL5Nugi7jHOuCaJ2W2P0mHlPjfhfNAnUOBm+jOOJsPfjhgcbkWd";
+    @Value("${signer_key}")
+    protected String SIGNER_KEY;
 
     public List<String> getEmailAdmin() {
         return userRepository.findEmailByRole(1);
@@ -262,7 +268,7 @@ public class UserService {
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                     .subject(username)
                     .issueTime(new Date())
-                    .expirationTime(new Date(Instant.now().plus(15, ChronoUnit.MINUTES).toEpochMilli()))
+                    .expirationTime(new Date(Instant.now().plus(12, ChronoUnit.HOURS).toEpochMilli()))
                     .claim("customClaim", "Custom")
                     .build();
             Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -272,5 +278,10 @@ public class UserService {
         } catch (JOSEException e) {
             throw new RuntimeException("Failed to generate token");
         }
+    }
+
+    public UserInfoDTO getUserInfoAfterAuthen(String username) {
+        return userRepository.findUserInfo(username)
+                .orElseThrow(() -> new EntityNotFoundException(messageUtils.getMessage("user.NotFound")));
     }
 }

@@ -10,11 +10,13 @@ import com.roomrentalmanagementbackend.service.ApartmentService;
 import com.roomrentalmanagementbackend.service.ApartmentStatusService;
 import com.roomrentalmanagementbackend.service.ApartmentTypeService;
 import com.roomrentalmanagementbackend.service.UtilityServiceService;
+import com.roomrentalmanagementbackend.utils.MessageUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class DashBoardController {
     ApartmentStatusService apartmentStatusService;
     ApartmentTypeService apartmentTypeService;
     UtilityServiceService utilityServiceService;
+    MessageUtils messageUtils;
 
     @GetMapping("/apartments")
     public ApiResponse<List<ApartmentManagementResponse>> getApartmentManagement() {
@@ -57,8 +60,11 @@ public class DashBoardController {
 
     @PostMapping("/apartments")
     public ApiResponse<String> addOrUpdateApartment(@RequestBody @Valid ApartmentDTO apartmentDTO) {
-        log.info(apartmentDTO.toString());
-        return apartmentService.addOrUpdateApartment(apartmentDTO);
+        if (apartmentService.checkValidSlug(apartmentDTO.getSlug())) {
+            log.info(apartmentDTO.toString());
+            return apartmentService.addOrUpdateApartment(apartmentDTO);
+        }
+        return ApiResponse.error(HttpStatus.BAD_REQUEST, messageUtils.getMessage("apartment.dto.name.invalid"));
     }
 
     @DeleteMapping("/apartments/{id}")
