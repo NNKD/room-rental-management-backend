@@ -141,7 +141,34 @@ public class UserService {
                         .build())
                 .collect(Collectors.toList());
     }
-
+    @Transactional(readOnly = true)
+    public List<UserResponse> getUsers() {
+        return userRepository.findByRole(0).stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullname(user.getFullname())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .totalRentalContracts(user.getRentalContracts() != null ? user.getRentalContracts().size() : 0)
+                        .build())
+                .collect(Collectors.toList());
+    }
+    @Transactional(readOnly = true)
+    public List<UserResponse> getUsersWithRentalContracts() {
+        return userRepository.findUsersWithRentalContracts().stream()
+                .map(user -> UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullname(user.getFullname())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .totalRentalContracts(user.getRentalContracts() != null ? user.getRentalContracts().size() : 0)
+                        .build())
+                .collect(Collectors.toList());
+    }
     @Transactional(readOnly = true)
     public List<UserResponse> getAllAdmins() {
         return userRepository.findByRole(1).stream()

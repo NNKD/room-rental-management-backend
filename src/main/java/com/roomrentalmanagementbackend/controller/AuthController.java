@@ -38,16 +38,20 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ApiResponse<Object> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         userService.forgotPassword(request);
-        return ResponseEntity.ok(ApiResponse.success("Mật khẩu mới đã được gửi tới email của bạn"));
+        return ApiResponse.success(null);
     }
-    @GetMapping("/users")
+    @GetMapping("/all-users")
     public ApiResponse<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         return ApiResponse.success(users);
     }
-
+    @GetMapping("/users")
+    public ApiResponse<List<UserResponse>> getUsers() {
+        List<UserResponse> users = userService.getUsers();
+        return ApiResponse.success(users);
+    }
     @GetMapping("/admins")
     public ApiResponse<List<UserResponse>> getAllAdmins() {
         List<UserResponse> admins = userService.getAllAdmins();
@@ -69,5 +73,10 @@ public class AuthController {
     public ApiResponse<String> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
         return ApiResponse.success("User deleted successfully");
+    }
+    @GetMapping("/users/rental-contracts")
+    public ApiResponse<List<UserResponse>> getUsersWithRentalContracts() {
+        List<UserResponse> users = userService.getUsersWithRentalContracts();
+        return ApiResponse.success(users);
     }
 }

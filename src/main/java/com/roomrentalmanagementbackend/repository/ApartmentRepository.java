@@ -139,4 +139,5 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
             WHERE a.slug = :slug
             """)
     Optional<ApartmentDTO> findApartmentDTOBySlug(@Param("slug") String slug);
+    List<Apartment> findByApartmentStatusId(Integer statusId);
 }

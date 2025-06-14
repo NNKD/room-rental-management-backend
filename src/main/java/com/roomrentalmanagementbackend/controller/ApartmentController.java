@@ -1,6 +1,7 @@
 package com.roomrentalmanagementbackend.controller;
 
 import com.roomrentalmanagementbackend.dto.ApiResponse;
+import com.roomrentalmanagementbackend.dto.apartment.ApartmentStatusDTO;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
 import com.roomrentalmanagementbackend.dto.apartment.request.ApartmentDetailFormRequest;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
@@ -21,10 +22,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/apartments")
@@ -42,6 +43,16 @@ public class ApartmentController {
         List<ApartmentListResponse> response = hotApartments.stream()
                 .map(apartment -> modelMapper.map(apartment, ApartmentListResponse.class))
                 .toList();
+        return ApiResponse.success(response);
+    }
+    @Operation(description = "Get apartments by status")
+    @GetMapping("/available")
+    public ApiResponse<List<ApartmentStatusDTO>> getAvailableApartments(
+            @RequestParam("status") Integer status) {
+        if (status == null || status < 1) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Status không hợp lệ");
+        }
+        List<ApartmentStatusDTO> response = apartmentService.getAvailableApartments(status);
         return ApiResponse.success(response);
     }
     @Operation(description = "Get list apartments per page with filter (apartment name, apartment type, number of bedroom, min price, max price) and sort by price")
