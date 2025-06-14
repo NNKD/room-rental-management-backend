@@ -6,6 +6,7 @@ import com.roomrentalmanagementbackend.dto.apartment.ApartmentStatusDTO;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentTypeDTO;
 import com.roomrentalmanagementbackend.dto.apartment.UtilityServiceDTO;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentManagementResponse;
+import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.service.ApartmentService;
 import com.roomrentalmanagementbackend.service.ApartmentStatusService;
 import com.roomrentalmanagementbackend.service.ApartmentTypeService;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +34,12 @@ public class DashBoardController {
     ApartmentTypeService apartmentTypeService;
     UtilityServiceService utilityServiceService;
     MessageUtils messageUtils;
+
+    @GetMapping("/users/me")
+    public ApiResponse getCurrentUser(Authentication authentication) {
+        UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
+        return ApiResponse.success(user);
+    }
 
     @GetMapping("/apartments")
     public ApiResponse<List<ApartmentManagementResponse>> getApartmentManagement() {
