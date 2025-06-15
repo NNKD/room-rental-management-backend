@@ -66,6 +66,8 @@ public class ApartmentService {
         Specification<Apartment> spec = ((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            predicates.add(cb.notEqual(root.get("apartmentStatus").get("id"), 3));
+
             if (name != null && !name.isEmpty()) {
                 predicates.add(cb.like(root.get("name"), "%" + name + "%"));
             }
@@ -211,5 +213,9 @@ public class ApartmentService {
 
     public boolean checkValidSlug(String slug) {
         return (getNameBySlug(slug).orElse("")).isEmpty();
+    }
+
+    public List<UserApartmentManagementResponse> getApartmentUserManagement(String username) {
+        return apartmentRepository.findApartmentContractByUser(username);
     }
 }
