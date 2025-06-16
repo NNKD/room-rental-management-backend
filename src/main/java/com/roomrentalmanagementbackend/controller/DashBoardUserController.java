@@ -6,6 +6,7 @@ import com.roomrentalmanagementbackend.dto.apartment.response.UserApartmentDetai
 
 import com.roomrentalmanagementbackend.dto.billing.response.BillResponseDTO;
 
+import com.roomrentalmanagementbackend.dto.payment.request.PaymentRequest;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.repository.UserRepository;
 import com.roomrentalmanagementbackend.service.ApartmentService;
@@ -17,15 +18,16 @@ import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 
 import com.roomrentalmanagementbackend.service.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -34,9 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DashBoardUserController {
     ApartmentService apartmentService;
-    UserRepository userRepository;
     BillingService billingService;
     UserService userService;
+    VnPayService vnPayService;
 
     @GetMapping("/me/apartments")
     public ApiResponse getApartmentUserByUsername(Authentication authentication) {
@@ -81,6 +83,15 @@ public class DashBoardUserController {
         }
         return userService.updateUserPass(user.getUsername(), request.getNewPass());
     }
+
+    @PostMapping("me/payment")
+    public ApiResponse payment(@RequestBody PaymentRequest request,
+                               HttpServletRequest servletRequest) {
+
+        return vnPayService.createVnPayPayment(request, servletRequest);
+    }
+
+
 
 }
 
