@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     @Query("SELECT p FROM Payment p WHERE p.rentalContractBill IN :rentalBills ORDER BY p.createdAt DESC")
@@ -17,4 +18,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     List<Payment> findByUserId(@Param("userId") Integer userId);
 
     List<Payment> findByUser(User user);
+
+    @Override
+    Optional<Payment> findById(Integer integer);
 }

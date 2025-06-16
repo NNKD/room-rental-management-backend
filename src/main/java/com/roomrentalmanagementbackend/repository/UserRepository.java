@@ -40,11 +40,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             """)
     Optional<UserAccountResponse> findUserAccount(@Param("username") String username);
 
-    @Query("""
-            SELECT u
-            FROM User u
-            WHERE u.username = :username
-            """)
-    Optional<User> findUserByUsername(@Param("username") String username);
+    @Query("SELECT u FROM User u WHERE LOWER(u.username) = LOWER(:username)")
+    Optional<User> findUserByUsernameIgnoreCase(@Param("username") String username);
+
 
 }

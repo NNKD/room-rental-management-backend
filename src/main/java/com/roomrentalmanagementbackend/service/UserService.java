@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -322,8 +324,9 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException(messageUtils.getMessage("user.NotFound")));
     }
 
+    @Transactional
     public ApiResponse updateUserAccount(String username, String newUsername) {
-        User u = userRepository.findUserByUsername(username).orElse(null);
+        User u = userRepository.findUserByUsernameIgnoreCase(username).orElse(null);
         if (u == null) {
             return ApiResponse.error(HttpStatus.NOT_FOUND, messageUtils.getMessage("user.NotFound"));
         }
@@ -332,18 +335,21 @@ public class UserService {
         return ApiResponse.success("Thành công");
     }
 
+    @Transactional
     public ApiResponse updateUserPass(String username, String pass) {
-        User u = userRepository.findUserByUsername(username).orElse(null);
+        User u = userRepository.findUserByUsernameIgnoreCase(username).orElse(null);
         if (u == null) {
             return ApiResponse.error(HttpStatus.NOT_FOUND, messageUtils.getMessage("user.NotFound"));
         }
-        u.setPassword(new BCryptPasswordEncoder().encode(pass));
+        String encodedPass = new BCryptPasswordEncoder().encode(pass);
+        log.info("Encoded pass: " + encodedPass);
+        u.setPassword(encodedPass);
         userRepository.save(u);
         return ApiResponse.success("Thành công");
     }
 
     public boolean checkValidUsername(String username) {
-        User u = userRepository.findUserByUsername(username).orElse(null);
+        User u = userRepository.findUserByUsernameIgnoreCase(username).orElse(null);
         if (u == null) {
             return true;
         }
@@ -351,11 +357,16 @@ public class UserService {
     }
 
     public boolean checkPass(String username, String pass) {
-        User u = userRepository.findUserByUsername(username).orElse(null);
+        log.info("mk5: ");
+        User u = userRepository.findUserByUsernameIgnoreCase(username).orElse(null);
+        log.info("mk6: "+username);
+        log.info("mk7: "+pass);
         if (u == null) {
+            log.info("mk9: ");
             return false;
         }
-        if (u.getPassword().equals(new BCryptPasswordEncoder().encode(pass))) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        if (passwordEncoder.matches(pass, u.getPassword())) {
             return true;
         }
         return false;

@@ -1,5 +1,6 @@
 package com.roomrentalmanagementbackend.dto.user.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,5 +10,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserAccountUsernameRequest {
-    String username;
+    @NotBlank(message = "Không được để trống")
+    String usernameOld;
+    @NotBlank(message = "Không được để trống")
+    String newUsername;
 }
