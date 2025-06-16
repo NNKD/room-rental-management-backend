@@ -28,7 +28,7 @@ public class SecurityConfig {
     JWTUtils jwtUtils;
     UserService userService;
     MessageUtils messageUtils;
-    List<String> securedPaths = Arrays.asList("/dashboard/**", "/dashboard-user/**", "/cloudinary/**");
+    List<String> securedPaths = Arrays.asList("/dashboard/**", "/dashboard-user/**","/cloudinary/**", "/auth/all-users", "/apartments/available");
 
     @Bean
     public PasswordEncoder passwordEncoder() {
