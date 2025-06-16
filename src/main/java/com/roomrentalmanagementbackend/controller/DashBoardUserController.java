@@ -1,26 +1,21 @@
 package com.roomrentalmanagementbackend.controller;
 
 import com.roomrentalmanagementbackend.dto.ApiResponse;
-import com.roomrentalmanagementbackend.dto.apartment.ApartmentDTO;
-import com.roomrentalmanagementbackend.dto.apartment.ApartmentStatusDTO;
-import com.roomrentalmanagementbackend.dto.apartment.ApartmentTypeDTO;
-import com.roomrentalmanagementbackend.dto.apartment.UtilityServiceDTO;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentManagementResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.UserApartmentDetailResponse;
+import com.roomrentalmanagementbackend.dto.billing.response.BillResponseDTO;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
+import com.roomrentalmanagementbackend.repository.UserRepository;
 import com.roomrentalmanagementbackend.service.ApartmentService;
-import com.roomrentalmanagementbackend.service.ApartmentStatusService;
-import com.roomrentalmanagementbackend.service.ApartmentTypeService;
-import com.roomrentalmanagementbackend.service.UtilityServiceService;
-import com.roomrentalmanagementbackend.utils.MessageUtils;
-import jakarta.validation.Valid;
+import com.roomrentalmanagementbackend.service.BillingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -31,6 +26,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DashBoardUserController {
     ApartmentService apartmentService;
+    private final UserRepository userRepository;
+    private final BillingService billingService;
 
     @GetMapping("/me/apartments")
     public ApiResponse getApartmentUserByUsername(Authentication authentication) {
@@ -44,4 +41,9 @@ public class DashBoardUserController {
         return apartmentService.getApartmentDetailUser(user.getUsername(), slug);
     }
 
+    @GetMapping("/me/bills")
+    public ApiResponse<List<BillResponseDTO>> getUserBills(Authentication authentication) {
+        UserInfoDTO userInfo = (UserInfoDTO) authentication.getPrincipal();
+        return ApiResponse.success(billingService.getUserBills(userInfo.getUsername()));
+    }
 }

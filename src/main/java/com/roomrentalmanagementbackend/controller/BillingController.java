@@ -7,6 +7,7 @@ import com.roomrentalmanagementbackend.entity.Payment;
 import com.roomrentalmanagementbackend.entity.RentalContractBill;
 import com.roomrentalmanagementbackend.repository.PaymentRepository;
 import com.roomrentalmanagementbackend.repository.ServiceBillRepository;
+import com.roomrentalmanagementbackend.repository.UserRepository;
 import com.roomrentalmanagementbackend.service.BillingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,10 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BillingController {
 
-     BillingService billingService;
+    BillingService billingService;
     ServiceBillRepository serviceBillRepository;
-     PaymentRepository paymentRepository;
+    PaymentRepository paymentRepository;
+    UserRepository userRepository;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -46,8 +48,8 @@ public class BillingController {
             return dto;
         }).collect(Collectors.toList()));
         response.setTotalAmount(payment.getTotalPrice());
-        response.setCreatedAt(rentalBill.getCreatedAt());
-        response.setDueDate(rentalBill.getDueDate());
+        response.setCreatedAt(rentalBill.getCreatedAt()); // Định dạng lại
+        response.setDueDate(rentalBill.getDueDate());     // Định dạng lại
         response.setStatus(payment.getStatus());
         return response;
     }
@@ -78,4 +80,6 @@ public class BillingController {
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
         paymentRepository.delete(payment);
     }
+
+
 }

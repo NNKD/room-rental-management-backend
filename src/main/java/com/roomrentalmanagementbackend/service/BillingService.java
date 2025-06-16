@@ -6,7 +6,9 @@ import com.roomrentalmanagementbackend.entity.*;
 import com.roomrentalmanagementbackend.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,25 +18,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+
 public class BillingService {
 
-    @Autowired
-    private RentalContractRepository rentalContractRepository;
+     RentalContractRepository rentalContractRepository;
 
-    @Autowired
-    private RentalContractBillRepository rentalContractBillRepository;
+     RentalContractBillRepository rentalContractBillRepository;
 
-    @Autowired
-    private ServiceBillRepository serviceBillRepository;
+     ServiceBillRepository serviceBillRepository;
 
-    @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private UtilityServiceRepository utilityServiceRepository;
-
+     PaymentRepository paymentRepository;
+    UtilityServiceRepository utilityServiceRepository;
+    UserRepository userRepository;
     @PersistenceContext
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
     @Transactional
     public Payment createBillForApartment(int rentalContractId, List<ServiceDetailDTO> serviceDetails) {
@@ -47,8 +46,8 @@ public class BillingService {
 
         RentalContractBill rentalBill = RentalContractBill.builder()
                 .price(rentalContract.getPrice())
-                .startDate(rentalContract.getStartDate().withMonth(1))
-                .endDate(rentalContract.getEndDate().withMonth(1))
+                .startDate(rentalContract.getStartDate().withMonth(now.getMonthValue()))
+                .endDate(rentalContract.getEndDate().withMonth(now.getMonthValue()))
                 .createdAt(now)
                 .dueDate(now.plusDays(30))
                 .rentalContract(rentalContract)
@@ -105,10 +104,9 @@ public class BillingService {
         payment.setTotalPrice(bill.getTotalAmount());
         paymentRepository.save(payment);
 
-        // Cập nhật ServiceBill
         List<ServiceBill> existingServiceBills = serviceBillRepository.findByPaymentId(paymentId);
         for (ServiceBill serviceBill : existingServiceBills) {
-            serviceBillRepository.delete(serviceBill); // Xóa các ServiceBill cũ
+            serviceBillRepository.delete(serviceBill);
         }
         List<ServiceBill> newServiceBills = bill.getServiceDetails().stream().map(detail -> {
             UtilityService utilityService = utilityServiceRepository.findById(detail.getServiceId())
@@ -133,4 +131,48 @@ public class BillingService {
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public List<BillResponseDTO> getUserBills(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Payment> payments = paymentRepository.findByUser(user);
+
+        return payments.stream()
+                .map(this::convertPaymentToBillResponse)
+                .collect(Collectors.toList());
+    }
+
+    private BillResponseDTO convertPaymentToBillResponse(Payment payment) {
+        BillResponseDTO response = new BillResponseDTO();
+        response.setId(payment.getId());
+        response.setName(payment.getName());
+        response.setStatus(payment.getStatus());
+        response.setTotalAmount(payment.getTotalPrice());
+        response.setCreatedAt(payment.getCreatedAt());
+
+        if (payment.getRentalContractBill() != null) {
+            response.setRentalAmount(payment.getRentalContractBill().getPrice());
+            response.setDueDate(payment.getRentalContractBill().getDueDate());
+        }
+
+        List<ServiceBill> serviceBills = serviceBillRepository.findByPayment(payment);
+        List<ServiceDetailDTO> serviceDetails = serviceBills.stream()
+                .map(serviceBill -> {
+                    ServiceDetailDTO dto = new ServiceDetailDTO();
+                    dto.setName(serviceBill.getName());
+                    dto.setQuantity(serviceBill.getQuantity());
+                    dto.setPrice(serviceBill.getPrice());
+                    dto.setTotalPrice(serviceBill.getTotalPrice());
+                    dto.setRentalContractId(serviceBill.getRentalContract().getId());
+                    dto.setServiceId(serviceBill.getUtilityService().getId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        response.setServiceDetails(serviceDetails);
+        return response;
+    }
+
 }
