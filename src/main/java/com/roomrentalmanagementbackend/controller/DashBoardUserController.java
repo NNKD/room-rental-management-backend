@@ -19,6 +19,7 @@ import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 import com.roomrentalmanagementbackend.service.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -67,20 +68,26 @@ public class DashBoardUserController {
     }
 
     @PutMapping("me/account/update-username")
-    public ApiResponse updateName(UserAccountUsernameRequest request, Authentication authentication) {
-        if (!userService.checkValidUsername(request.getUsername())) {
-            ApiResponse.error(HttpStatus.BAD_REQUEST, "Đã tồn tại username");
+    public ApiResponse updateName(@RequestBody UserAccountUsernameRequest request) {
+        log.info("Name"+request.getUsernameOld());
+        log.info("Name2"+request.getNewUsername());
+        if (!userService.checkValidUsername(request.getNewUsername())) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Đã tồn tại username");
         }
-        UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
-        return userService.updateUserAccount(user.getUsername(), request.getUsername());
+        return userService.updateUserAccount(request.getUsernameOld(), request.getNewUsername());
     }
 
     @PutMapping("me/account/update-pass")
-    public ApiResponse updatePass(UserAccountPassRequest request, Authentication authentication) {
+    public ApiResponse updatePass(@RequestBody @Valid UserAccountPassRequest request, Authentication authentication) {
         UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
+        log.info("mk1: "+request.getPass());
+        log.info("mk2 "+  request.getNewPass());
         if (!userService.checkPass(user.getUsername(), request.getPass())) {
-            ApiResponse.error(HttpStatus.BAD_REQUEST, "Mật khẩu không đúng");
+            log.info("mk3");
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Mật khẩu không đúng");
         }
+        log.info("mk4");
+
         return userService.updateUserPass(user.getUsername(), request.getNewPass());
     }
 
