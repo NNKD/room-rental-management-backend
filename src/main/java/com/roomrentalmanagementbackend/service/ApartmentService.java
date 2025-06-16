@@ -6,8 +6,10 @@ import com.roomrentalmanagementbackend.dto.apartment.*;
 import com.roomrentalmanagementbackend.dto.apartment.filter.response.FilterDataResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.*;
 import com.roomrentalmanagementbackend.entity.*;
+import com.roomrentalmanagementbackend.enums.RentalStatus;
 import com.roomrentalmanagementbackend.repository.ApartmentRepository;
 import com.roomrentalmanagementbackend.utils.CloudinaryUtils;
+import com.roomrentalmanagementbackend.utils.MessageUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -39,6 +41,7 @@ public class ApartmentService {
     ApartmentInformationService apartmentInformationService;
     CloudinaryUtils cloudinaryUtils;
     ModelMapper modelMapper;
+    private final MessageUtils messageUtils;
 
     public List<Apartment> getHotApartments() {
         return apartmentRepository.findByHot(1);
@@ -217,5 +220,14 @@ public class ApartmentService {
 
     public List<UserApartmentManagementResponse> getApartmentUserManagement(String username) {
         return apartmentRepository.findApartmentContractByUser(username);
+    }
+
+    public ApiResponse<UserApartmentDetailResponse> getApartmentDetailUser(String username, String slug) {
+        UserApartmentDetailResponse apartmentDetailResponse = apartmentRepository.findApartmentDetailContractByUser(username, slug).orElse(null);
+        if (apartmentDetailResponse == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, messageUtils.getMessage("apartment.Null"));
+        }
+        apartmentDetailResponse.setRentalContractStatus(RentalStatus.getRentalStatus(apartmentDetailResponse.getRentalContractStatus()));
+        return ApiResponse.success(apartmentDetailResponse);
     }
 }

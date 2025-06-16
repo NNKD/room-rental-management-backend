@@ -96,5 +96,4 @@ public class DashBoardController {
     public ApiResponse<Boolean> checkType(@RequestParam String name) {
         return apartmentTypeService.validType(name);
     }
-
 }

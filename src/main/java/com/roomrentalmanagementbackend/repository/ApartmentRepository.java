@@ -154,4 +154,33 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
         WHERE u.username = :username AND rc.status = "ACTIVE"
     """)
     List<UserApartmentManagementResponse> findApartmentContractByUser(@Param("username") String username);
+
+    @Query("""
+            SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+                UserApartmentDetailResponse(
+                    rc.name,
+                    rc.price,
+                    rc.status,
+                    rc.startDate,
+                    rc.endDate,
+                    rc.createdAt,
+                    a.name,
+                    at.name,
+                    ai.floor,
+                    ai.width,
+                    ai.height,
+                    ai.balcony,
+                    ai.terrace,
+                    u.fullname,
+                    u.phone,
+                    u.email
+                )
+            FROM Apartment a
+                JOIN a.apartmentType at
+                JOIN a.apartmentInformation ai
+                JOIN a.rentalContracts rc
+                JOIN rc.user u
+            WHERE u.username = :username AND a.slug = :slug
+            """)
+    Optional<UserApartmentDetailResponse> findApartmentDetailContractByUser(@Param("username") String username, @Param("slug") String slug);
 }

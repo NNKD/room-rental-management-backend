@@ -6,6 +6,7 @@ import com.roomrentalmanagementbackend.dto.apartment.ApartmentStatusDTO;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentTypeDTO;
 import com.roomrentalmanagementbackend.dto.apartment.UtilityServiceDTO;
 import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentManagementResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.UserApartmentDetailResponse;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.service.ApartmentService;
 import com.roomrentalmanagementbackend.service.ApartmentStatusService;
@@ -35,6 +36,12 @@ public class DashBoardUserController {
     public ApiResponse getApartmentUserByUsername(Authentication authentication) {
         UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
         return ApiResponse.success(apartmentService.getApartmentUserManagement(user.getUsername()));
+    }
+
+    @GetMapping("me/apartments/{slug}")
+    public ApiResponse<UserApartmentDetailResponse> getApartmentDetailUser(@PathVariable String slug, Authentication authentication) {
+        UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
+        return apartmentService.getApartmentDetailUser(user.getUsername(), slug);
     }
 
 }
