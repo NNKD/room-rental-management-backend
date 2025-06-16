@@ -2,11 +2,12 @@ package com.roomrentalmanagementbackend.repository;
 
 import com.roomrentalmanagementbackend.entity.RentalContract;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-@Repository
 public interface RentalContractRepository extends JpaRepository<RentalContract, Integer> {
-    List<RentalContract> findByUserId(int userId);
+    @Query("SELECT rc FROM RentalContract rc WHERE rc.user.id = :userId AND rc.status = 'ACTIVE'")
+    List<RentalContract> findByUserId(@Param("userId") Integer userId);
 }
