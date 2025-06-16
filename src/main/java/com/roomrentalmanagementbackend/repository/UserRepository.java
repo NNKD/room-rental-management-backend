@@ -1,5 +1,6 @@
 package com.roomrentalmanagementbackend.repository;
 
+import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,5 +32,19 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             WHERE u.username = :username
             """)
     Optional<UserInfoDTO> findUserInfo(@Param("username") String username);
+
+    @Query("""
+            SELECT new com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse(u.email, u.username, u.fullname, u.phone)
+            FROM User u
+            WHERE u.username = :username
+            """)
+    Optional<UserAccountResponse> findUserAccount(@Param("username") String username);
+
+    @Query("""
+            SELECT u
+            FROM User u
+            WHERE u.username = :username
+            """)
+    Optional<User> findUserByUsername(@Param("username") String username);
 
 }
