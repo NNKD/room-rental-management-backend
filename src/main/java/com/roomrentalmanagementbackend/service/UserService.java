@@ -3,10 +3,12 @@ package com.roomrentalmanagementbackend.service;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
 import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
 import com.roomrentalmanagementbackend.dto.user.request.UserRequestDTO;
 import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
+import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.dto.user.response.UserResponse;
 import com.roomrentalmanagementbackend.entity.User;
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.expression.spel.ast.OpAnd;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +33,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -310,5 +315,49 @@ public class UserService {
     public UserInfoDTO getUserInfoAfterAuthen(String username) {
         return userRepository.findUserInfo(username)
                 .orElseThrow(() -> new EntityNotFoundException(messageUtils.getMessage("user.NotFound")));
+    }
+
+    public UserAccountResponse getUserAccount(String username) {
+        return userRepository.findUserAccount(username)
+                .orElseThrow(() -> new EntityNotFoundException(messageUtils.getMessage("user.NotFound")));
+    }
+
+    public ApiResponse updateUserAccount(String username, String newUsername) {
+        User u = userRepository.findUserByUsername(username).orElse(null);
+        if (u == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, messageUtils.getMessage("user.NotFound"));
+        }
+        u.setUsername(newUsername);
+        userRepository.save(u);
+        return ApiResponse.success("Thành công");
+    }
+
+    public ApiResponse updateUserPass(String username, String pass) {
+        User u = userRepository.findUserByUsername(username).orElse(null);
+        if (u == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, messageUtils.getMessage("user.NotFound"));
+        }
+        u.setPassword(new BCryptPasswordEncoder().encode(pass));
+        userRepository.save(u);
+        return ApiResponse.success("Thành công");
+    }
+
+    public boolean checkValidUsername(String username) {
+        User u = userRepository.findUserByUsername(username).orElse(null);
+        if (u == null) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean checkPass(String username, String pass) {
+        User u = userRepository.findUserByUsername(username).orElse(null);
+        if (u == null) {
+            return false;
+        }
+        if (u.getPassword().equals(new BCryptPasswordEncoder().encode(pass))) {
+            return true;
+        }
+        return false;
     }
 }
