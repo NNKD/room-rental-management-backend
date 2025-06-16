@@ -1,25 +1,23 @@
 package com.roomrentalmanagementbackend.controller;
 
-import com.cloudinary.Api;
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.UserApartmentDetailResponse;
 
 import com.roomrentalmanagementbackend.dto.billing.response.BillResponseDTO;
 
 import com.roomrentalmanagementbackend.dto.payment.request.PaymentRequest;
+import com.roomrentalmanagementbackend.dto.user.request.UserAccountPassRequest;
+import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
-import com.roomrentalmanagementbackend.repository.UserRepository;
 import com.roomrentalmanagementbackend.service.ApartmentService;
 import com.roomrentalmanagementbackend.service.BillingService;
 
-import com.roomrentalmanagementbackend.dto.user.request.UserAccountPassRequest;
-import com.roomrentalmanagementbackend.dto.user.request.UserAccountUsernameRequest;
-import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 
 import com.roomrentalmanagementbackend.service.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import com.roomrentalmanagementbackend.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -67,26 +65,13 @@ public class DashBoardUserController {
         return ApiResponse.success(userService.getUserAccount(user.getUsername()));
     }
 
-    @PutMapping("me/account/update-username")
-    public ApiResponse updateName(@RequestBody UserAccountUsernameRequest request) {
-        log.info("Name"+request.getUsernameOld());
-        log.info("Name2"+request.getNewUsername());
-        if (!userService.checkValidUsername(request.getNewUsername())) {
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Đã tồn tại username");
-        }
-        return userService.updateUserAccount(request.getUsernameOld(), request.getNewUsername());
-    }
 
     @PutMapping("me/account/update-pass")
     public ApiResponse updatePass(@RequestBody @Valid UserAccountPassRequest request, Authentication authentication) {
         UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
-        log.info("mk1: "+request.getPass());
-        log.info("mk2 "+  request.getNewPass());
         if (!userService.checkPass(user.getUsername(), request.getPass())) {
-            log.info("mk3");
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Mật khẩu không đúng");
         }
-        log.info("mk4");
 
         return userService.updateUserPass(user.getUsername(), request.getNewPass());
     }

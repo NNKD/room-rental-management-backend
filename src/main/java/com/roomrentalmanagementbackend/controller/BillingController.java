@@ -1,5 +1,6 @@
 package com.roomrentalmanagementbackend.controller;
 
+import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.billing.request.CreateBillRequest;
 import com.roomrentalmanagementbackend.dto.billing.response.BillResponseDTO;
 import com.roomrentalmanagementbackend.dto.billing.response.ServiceDetailDTO;
@@ -12,6 +13,7 @@ import com.roomrentalmanagementbackend.service.BillingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
@@ -48,38 +50,58 @@ public class BillingController {
             return dto;
         }).collect(Collectors.toList()));
         response.setTotalAmount(payment.getTotalPrice());
-        response.setCreatedAt(rentalBill.getCreatedAt()); // Định dạng lại
-        response.setDueDate(rentalBill.getDueDate());     // Định dạng lại
+        response.setCreatedAt(rentalBill.getCreatedAt());
+        response.setDueDate(rentalBill.getDueDate());
         response.setStatus(payment.getStatus());
         return response;
     }
 
     @GetMapping
-    public List<BillResponseDTO> getAllBills() {
-        List<Payment> payments = billingService.getAllPayments();
-        return payments.stream()
-                .map(this::mapPaymentToResponse)
-                .collect(Collectors.toList());
+    public ApiResponse<List<BillResponseDTO>> getAllBills() {
+        try {
+            List<Payment> payments = billingService.getAllPayments();
+            List<BillResponseDTO> billResponses = payments.stream()
+                    .map(this::mapPaymentToResponse)
+                    .collect(Collectors.toList());
+            return ApiResponse.success(billResponses);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "serverError");
+        }
     }
 
     @PostMapping("/create/{rentalContractId}")
-    public BillResponseDTO createBill(@PathVariable int rentalContractId, @RequestBody CreateBillRequest request) {
-        Payment payment = billingService.createBillForApartment(rentalContractId, request.getServiceDetails());
-        return mapPaymentToResponse(payment);
+    public ApiResponse<BillResponseDTO> createBill(
+            @PathVariable int rentalContractId,
+            @RequestBody CreateBillRequest request) {
+        try {
+            Payment payment = billingService.createBillForApartment(rentalContractId, request.getServiceDetails());
+            return ApiResponse.success(mapPaymentToResponse(payment));
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "serverError");
+        }
     }
 
     @PutMapping("/{id}")
-    public BillResponseDTO updateBill(@PathVariable int id, @RequestBody BillResponseDTO bill) {
-        Payment updatedPayment = billingService.updateBill(id, bill);
-        return mapPaymentToResponse(updatedPayment);
+    public ApiResponse<BillResponseDTO> updateBill(
+            @PathVariable int id,
+            @RequestBody BillResponseDTO bill) {
+        try {
+            Payment updatedPayment = billingService.updateBill(id, bill);
+            return ApiResponse.success(mapPaymentToResponse(updatedPayment));
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "serverError");
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBill(@PathVariable int id) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-        paymentRepository.delete(payment);
+    public ApiResponse<Void> deleteBill(@PathVariable int id) {
+        try {
+            Payment payment = paymentRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("paymentNotFound"));
+            paymentRepository.delete(payment);
+            return ApiResponse.success(null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "serverError");
+        }
     }
-
-
 }
