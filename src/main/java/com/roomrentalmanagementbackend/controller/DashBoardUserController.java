@@ -1,31 +1,25 @@
 package com.roomrentalmanagementbackend.controller;
 
-import com.cloudinary.Api;
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.apartment.response.UserApartmentDetailResponse;
-
 import com.roomrentalmanagementbackend.dto.billing.response.BillResponseDTO;
-
+import com.roomrentalmanagementbackend.dto.user.request.UserAccountPassRequest;
+import com.roomrentalmanagementbackend.dto.user.request.UserAccountUsernameRequest;
+import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.repository.UserRepository;
 import com.roomrentalmanagementbackend.service.ApartmentService;
 import com.roomrentalmanagementbackend.service.BillingService;
-
-import com.roomrentalmanagementbackend.dto.user.request.UserAccountPassRequest;
-import com.roomrentalmanagementbackend.dto.user.request.UserAccountUsernameRequest;
-import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
-
-import com.roomrentalmanagementbackend.service.*;
-
+import com.roomrentalmanagementbackend.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
