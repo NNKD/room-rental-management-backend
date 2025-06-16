@@ -70,7 +70,7 @@ public class DashBoardUserController {
     public ApiResponse updatePass(@RequestBody @Valid UserAccountPassRequest request, Authentication authentication) {
         UserInfoDTO user = (UserInfoDTO) authentication.getPrincipal();
         if (!userService.checkPass(user.getUsername(), request.getPass())) {
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Mật khẩu không đúng");
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "invalidPassword");
         }
 
         return userService.updateUserPass(user.getUsername(), request.getNewPass());

@@ -6,8 +6,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.roomrentalmanagementbackend.dto.ApiResponse;
 import com.roomrentalmanagementbackend.dto.auth.request.AuthenticationRequest;
 import com.roomrentalmanagementbackend.dto.auth.request.ForgotPasswordRequest;
-import com.roomrentalmanagementbackend.dto.user.request.UserRequestDTO;
 import com.roomrentalmanagementbackend.dto.auth.response.AuthenticationResponse;
+import com.roomrentalmanagementbackend.dto.user.request.UserRequestDTO;
 import com.roomrentalmanagementbackend.dto.user.response.UserAccountResponse;
 import com.roomrentalmanagementbackend.dto.user.response.UserInfoDTO;
 import com.roomrentalmanagementbackend.dto.user.response.UserResponse;
@@ -21,7 +21,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,7 +33,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -113,12 +111,12 @@ public class UserService {
         }
 
         User user = (User) userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new BadCredentialsException("User not found"));
+                .orElseThrow(() -> new BadCredentialsException("userNotFound"));
 
         // Verify password
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid password");
+            throw new BadCredentialsException("invalidPassword");
         }
 
         // Generate token
@@ -342,7 +340,6 @@ public class UserService {
             return ApiResponse.error(HttpStatus.NOT_FOUND, messageUtils.getMessage("user.NotFound"));
         }
         String encodedPass = new BCryptPasswordEncoder().encode(pass);
-        log.info("Encoded pass: " + encodedPass);
         u.setPassword(encodedPass);
         userRepository.save(u);
         return ApiResponse.success("Thành công");
