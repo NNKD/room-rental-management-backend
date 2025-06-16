@@ -1,20 +1,20 @@
 package com.roomrentalmanagementbackend.dto.apartment.response;
 
+import com.roomrentalmanagementbackend.dto.rentalContract.response.RentalContractResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
+import java.time.LocalDateTime;
+
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ApartmentManagementResponse {
-    int id;
+public class UserApartmentManagementResponse {
     String name;
     String slug;
-    double price;
     String type;
-    String status;
-    String user;
-    String userEmail;
+    LocalDateTime startDate;
+    LocalDateTime endDate;
 }

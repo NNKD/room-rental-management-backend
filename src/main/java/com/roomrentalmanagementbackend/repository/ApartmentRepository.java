@@ -3,10 +3,7 @@ package com.roomrentalmanagementbackend.repository;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentDTO;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentDiscountDTO;
 import com.roomrentalmanagementbackend.dto.apartment.ApartmentImageDTO;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDetailResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentDiscountResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentImageResponse;
-import com.roomrentalmanagementbackend.dto.apartment.response.ApartmentManagementResponse;
+import com.roomrentalmanagementbackend.dto.apartment.response.*;
 import com.roomrentalmanagementbackend.entity.Apartment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -140,4 +137,50 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
             """)
     Optional<ApartmentDTO> findApartmentDTOBySlug(@Param("slug") String slug);
     List<Apartment> findByApartmentStatusId(Integer statusId);
+
+    @Query("""
+        SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+            UserApartmentManagementResponse(
+                a.name,
+                a.slug,
+                at.name,
+                rc.startDate,
+                rc.endDate
+            )
+        FROM Apartment a
+            JOIN a.apartmentType at
+            JOIN a.rentalContracts rc
+            JOIN rc.user u
+        WHERE u.username = :username AND rc.status = "ACTIVE"
+    """)
+    List<UserApartmentManagementResponse> findApartmentContractByUser(@Param("username") String username);
+
+    @Query("""
+            SELECT new com.roomrentalmanagementbackend.dto.apartment.response.
+                UserApartmentDetailResponse(
+                    rc.name,
+                    rc.price,
+                    rc.status,
+                    rc.startDate,
+                    rc.endDate,
+                    rc.createdAt,
+                    a.name,
+                    at.name,
+                    ai.floor,
+                    ai.width,
+                    ai.height,
+                    ai.balcony,
+                    ai.terrace,
+                    u.fullname,
+                    u.phone,
+                    u.email
+                )
+            FROM Apartment a
+                JOIN a.apartmentType at
+                JOIN a.apartmentInformation ai
+                JOIN a.rentalContracts rc
+                JOIN rc.user u
+            WHERE u.username = :username AND a.slug = :slug
+            """)
+    Optional<UserApartmentDetailResponse> findApartmentDetailContractByUser(@Param("username") String username, @Param("slug") String slug);
 }

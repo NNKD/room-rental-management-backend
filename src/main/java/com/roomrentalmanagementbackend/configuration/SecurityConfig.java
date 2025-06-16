@@ -7,14 +7,17 @@ import com.roomrentalmanagementbackend.utils.MessageUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class SecurityConfig {
     JWTUtils jwtUtils;
     UserService userService;
     MessageUtils messageUtils;
-    List<String> securedPaths = Arrays.asList("/dashboard/**", "/cloudinary/**", "/auth/all-users", "/apartments/available");
+    List<String> securedPaths = Arrays.asList("/dashboard/**", "/dashboard-user/**","/cloudinary/**", "/auth/all-users", "/apartments/available");
 
     @Bean
     public PasswordEncoder passwordEncoder() {
